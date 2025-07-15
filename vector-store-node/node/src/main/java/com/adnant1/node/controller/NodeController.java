@@ -40,6 +40,17 @@ public class NodeController {
     // Search for similar texts given a query
     @PostMapping("/query")
     public List<SearchResult> query(@RequestBody Map<String, Object> body) {
+        Object queryTextRaw = body.get("query");
+        Object topKRaw = body.get("topK");
 
+        if (!(queryTextRaw instanceof String queryText) || queryText.isBlank()) {
+            throw new IllegalArgumentException("Missing or invalid query");
+        }
+
+        if (!(topKRaw instanceof Integer topK) || topK <= 0) {
+            throw new IllegalArgumentException("Missing or invalid topK");
+        }
+
+        return vectorStoreService.querySimilar(queryText, topK);
     }
 }
