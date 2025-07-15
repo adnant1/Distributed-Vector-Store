@@ -25,34 +25,52 @@ public class VectorStoreService {
     @PostConstruct
     public void setupVectorIndex() {
         String indexName = "vectors";
+        boolean connected = false;
+        
+        // Retry logic to handle ES not being ready immediately
+        for (int i = 0; i < 5; i++) {
+            try {
+                boolean exists = esClient.indices().exists(b -> b.index(indexName)).value();
 
-        try {
-            boolean exists = esClient.indices().exists(b -> b.index(indexName)).value();
-
-            if (!exists) {
-                esClient.indices().create(c -> c
-                    .index(indexName)
-                    .mappings(m -> m
-                        .properties("id", p -> p.keyword(k -> k))
-                        .properties("text", p -> p.text(t -> t))
-                        .properties("embedding", p -> p
-                            .denseVector(dv -> dv
-                                .dims(1536)
-                                .index(true)
-                                .similarity("cosine")
-                                .indexOptions(io -> io.type("hnsw"))
+                if (!exists) {
+                    esClient.indices().create(c -> c
+                        .index(indexName)
+                        .mappings(m -> m
+                            .properties("id", p -> p.keyword(k -> k))
+                            .properties("text", p -> p.text(t -> t))
+                            .properties("embedding", p -> p
+                                .denseVector(dv -> dv
+                                    .dims(1536)
+                                    .index(true)
+                                    .similarity("cosine")
+                                    .indexOptions(io -> io
+                                        .type("hnsw")
+                                        .m(16)
+                                        .efConstruction(512)
+                                    )
+                                )
                             )
                         )
-                    )
-                );
+                    );
+                    System.out.println("Created index: " + indexName);
+                } else {
+                    System.out.println("Index already exists: " + indexName);
+                }
 
-                System.out.println("Created index: " + indexName);
-            } else {
-                System.out.println("Index already exists: " + indexName);
+                connected = true;
+                break;
+
+            } catch (Exception e) {
+                System.out.println("Retry " + (i + 1) + ": ES not ready — waiting...");
+                System.out.println(e.getMessage());
+                try {
+                    Thread.sleep(3000); // wait 3s
+                } catch (InterruptedException ignored) {}
             }
-
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to set up Elasticsearch index", e);
+        }
+        
+        if (!connected) {
+            System.out.println("Failed to connect to ES");
         }
     }
 
