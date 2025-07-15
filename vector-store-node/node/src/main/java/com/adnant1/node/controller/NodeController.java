@@ -28,7 +28,7 @@ public class NodeController {
 
     // Search for similar texts given a query
     @PostMapping("/query")
-    public List<SearchResult> search(@RequestBody Map<String, Object> body) {
+    public List<SearchResult> query(@RequestBody Map<String, Object> body) {
 
     }
 }
