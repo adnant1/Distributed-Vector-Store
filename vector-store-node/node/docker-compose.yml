@@ -1,0 +1,29 @@
+services:
+  elasticsearch1:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
+    container_name: elasticsearch1
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - xpack.security.enabled=false
+    ports:
+      - 9200:9200
+    networks:
+      - vector-net
+
+  vector-store-node:
+    build: .
+    container_name: vector-store-node
+    depends_on:
+      - elasticsearch1
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ES_HOST=http://elasticsearch1:9200
+    ports:
+      - 8080:8080
+    networks:
+      - vector-net
+
+networks:
+  vector-net:
+    driver: bridge
