@@ -23,7 +23,18 @@ public class NodeController {
     // Index text and its embedding
     @PostMapping("/index")
     public void index(@RequestBody Map<String, String> body) {
-    
+        String id = body.get("id");
+        String text = body.get("text");
+
+        if (id == null || id.isBlank()) {
+            throw new IllegalArgumentException("ID is required");
+        }
+
+        if (text == null || text.isBlank()) {
+            throw new IllegalArgumentException("Text is required");
+        }
+
+        vectorStoreService.indexVector(id, text);
     }
 
     // Search for similar texts given a query
