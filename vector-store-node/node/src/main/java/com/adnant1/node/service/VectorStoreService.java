@@ -1,13 +1,14 @@
 package com.adnant1.node.service;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Service;
 import com.adnant1.node.client.OpenAIClient;
+import com.adnant1.node.model.SearchResult;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 
 @Service
@@ -79,7 +80,39 @@ public class VectorStoreService {
     }
 
     // Search for similar texts based on the input query
-    public List<SearchResult> querySimilar(String queryText, int topK) {
+    public List<SearchResult> querySimilar(String queryText, long topK) {
+        List<Float> queryVector = openAIClient.getEmbedding(queryText);
 
+        try {
+            // Perform KNN search in Elasticsearch
+            var response = esClient.search(s -> s
+                    .index("vectors")
+                    .knn(k -> k
+                        .field("embedding")
+                        .k(topK)
+                        .numCandidates(100L)
+                        .queryVector(queryVector)
+                    ),
+                    Map.class // raw doc as Map<String, Object>
+            );
+
+            // Parse search results
+            List<SearchResult> results = new ArrayList<>();
+            for (var hit : response.hits().hits()) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> source = (Map<String, Object>) hit.source();
+                Double score = hit.score();
+
+                String id = (String) source.get("id");
+                String text = (String) source.get("text");
+
+                results.add(new SearchResult(id, text, score));
+            }
+
+            return results;
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to execute KNN search", e);
+        }
     }
 }
