@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import com.adnant1.node.client.OpenAIClient;
 import com.adnant1.node.model.SearchResult;
@@ -15,15 +16,23 @@ import co.elastic.clients.elasticsearch.ElasticsearchClient;
 public class VectorStoreService {
     private final OpenAIClient openAIClient;
     private final ElasticsearchClient esClient;
+    private final String esHost;
 
-    public VectorStoreService(OpenAIClient openAIClient, ElasticsearchClient esClient) {
+    public VectorStoreService(OpenAIClient openAIClient, ElasticsearchClient esClient, @Value("${elasticsearch.host}") String esHost) {
         this.openAIClient = openAIClient;
         this.esClient = esClient;
+        this.esHost = esHost;
     }
 
     // Create the Elasticsearch index for storing vectors
     @PostConstruct
     public void setupVectorIndex() {
+        // Skip ES setup if running locally
+        if (esHost.contains("localhost")) {
+            System.out.println("Skipping ES setup for localhost");
+            return;
+        }
+        
         String indexName = "vectors";
         boolean connected = false;
         
