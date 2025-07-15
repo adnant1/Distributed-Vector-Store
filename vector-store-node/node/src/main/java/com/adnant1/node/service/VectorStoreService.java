@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Service;
 import com.adnant1.node.client.OpenAIClient;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
@@ -17,6 +18,41 @@ public class VectorStoreService {
     public VectorStoreService(OpenAIClient openAIClient, ElasticsearchClient esClient) {
         this.openAIClient = openAIClient;
         this.esClient = esClient;
+    }
+
+    // Create the Elasticsearch index for storing vectors
+    @PostConstruct
+    public void setupVectorIndex() {
+        String indexName = "vectors";
+
+        try {
+            boolean exists = esClient.indices().exists(b -> b.index(indexName)).value();
+
+            if (!exists) {
+                esClient.indices().create(c -> c
+                    .index(indexName)
+                    .mappings(m -> m
+                        .properties("id", p -> p.keyword(k -> k))
+                        .properties("text", p -> p.text(t -> t))
+                        .properties("embedding", p -> p
+                            .denseVector(dv -> dv
+                                .dims(1536)
+                                .index(true)
+                                .similarity("cosine")
+                                .indexOptions(io -> io.type("hnsw"))
+                            )
+                        )
+                    )
+                );
+
+                System.out.println("Created index: " + indexName);
+            } else {
+                System.out.println("Index already exists: " + indexName);
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to set up Elasticsearch index", e);
+        }
     }
 
     // Store the text and its embedding in Elasticsearch
