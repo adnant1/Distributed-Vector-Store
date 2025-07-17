@@ -24,13 +24,22 @@ public class CoordinatorController {
 
     // Send index request to coordinator service, which routes it to the appropriate vector node
     @PostMapping("/index")
-    public ResponseEntity<Void> index(IndexRequest request) {
+    public ResponseEntity<?> index(IndexRequest request) {
+        if (request.getId() == null || request.getId().isBlank()) {
+            return ResponseEntity.badRequest().body("ID cannot be null or blank");
+        }
 
+        if (request.getText() == null || request.getText().isBlank()) {
+            return ResponseEntity.badRequest().body("Text cannot be null or blank");
+        }
+
+        coordinatorService.index(request);
+        return ResponseEntity.ok().build();
     }
 
     // Send query request to coordinator service, which queries all vector nodes and aggregates results
     @PostMapping("/query")
-    public List<QueryResult> query(QueryRequest request) {
-    
+    public ResponseEntity<?> query(QueryRequest request) {
+       
     }
 }
