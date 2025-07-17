@@ -18,7 +18,18 @@ public class ConsistentHashRing{
     // Initialize the consistent hash ring
     @PostConstruct
     public void init() {
+        if (nodeUrls == null || nodeUrls.isEmpty()) {
+            throw new IllegalStateException("No node URLs configured for the hash ring.");
+        }
 
+        // Add each node as multiple virtual nodes onto the ring
+        for (String node: nodeUrls) {
+            for (int i = 0; i < VIRTUAL_NODES; i++) {
+                String virtualNodeKey = node + "-VN#" + i;
+                int hash = hash(virtualNodeKey);
+                ring.put(hash, node);
+            }
+        }
     }
 
     // MD5-based hash function
