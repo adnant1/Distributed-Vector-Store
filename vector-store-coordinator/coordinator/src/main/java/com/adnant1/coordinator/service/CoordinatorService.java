@@ -25,8 +25,10 @@ public class CoordinatorService {
         this.vectorNodeClient = vectorNodeClient;
     }
 
+    // Send the index request to the appropriate vector node via VectorNodeClient
     public void index(IndexRequest request) {
-
+        String targetNode = hashRing.getNodeForId(request.getId());
+        vectorNodeClient.sendIndexRequest(targetNode, request).block();
     }
 
     public List<QueryResult> query(QueryRequest request) {
