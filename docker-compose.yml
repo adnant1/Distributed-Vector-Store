@@ -1,0 +1,135 @@
+services:
+  coordinator:
+    build: ./vector-store-coordinator/coordinator
+    container_name: coordinator
+    ports:
+      - "8080:8080"
+    environment:
+      - NODE_URLS=http://node-a:8080,http://node-b:8080,http://node-c:8080,http://node-d:8080,http://node-e:8080
+    depends_on:
+      - node-a
+      - node-b
+      - node-c
+      - node-d
+      - node-e
+    networks:
+      - vector-net
+
+  node-a:
+    build: ./vector-store-node/node
+    container_name: node-a
+    ports:
+      - "8081:8080"
+    environment:
+      - ES_HOST=http://es-a:9200
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    depends_on:
+      - es-a
+    networks:
+      - vector-net
+
+  es-a:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
+    container_name: es-a
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    networks:
+      - vector-net
+
+  node-b:
+    build: ./vector-store-node/node
+    container_name: node-b
+    ports:
+      - "8082:8080"
+    environment:
+      - ES_HOST=http://es-b:9200
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    depends_on:
+      - es-b
+    networks:
+      - vector-net
+
+  es-b:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
+    container_name: es-b
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    networks:
+      - vector-net
+
+  node-c:
+    build: ./vector-store-node/node
+    container_name: node-c
+    ports:
+      - "8083:8080"
+    environment:
+      - ES_HOST=http://es-c:9200
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    depends_on:
+      - es-c
+    networks:
+      - vector-net
+
+  es-c:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
+    container_name: es-c
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    networks:
+      - vector-net
+
+  node-d:
+    build: ./vector-store-node/node
+    container_name: node-d
+    ports:
+      - "8084:8080"
+    environment:
+      - ES_HOST=http://es-d:9200
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    depends_on:
+      - es-d
+    networks:
+      - vector-net
+
+  es-d:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
+    container_name: es-d
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    networks:
+      - vector-net
+
+  node-e:
+    build: ./vector-store-node/node
+    container_name: node-e
+    ports:
+      - "8085:8080"
+    environment:
+      - ES_HOST=http://es-e:9200
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    depends_on:
+      - es-e
+    networks:
+      - vector-net
+
+  es-e:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
+    container_name: es-e
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    networks:
+      - vector-net
+
+networks:
+  vector-net:
+    driver: bridge
