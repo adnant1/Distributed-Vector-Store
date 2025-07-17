@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -52,6 +53,21 @@ public class ConsistentHashRing{
 
     // Given a document ID, find the appropriate node URL
     public String getNodeForId(String id) {
+        if (id == null || id.isBlank()) {
+            throw new IllegalArgumentException("ID cannot be null or blank");
+        }
 
+        if (ring.isEmpty()) {
+            throw new IllegalStateException("Hash ring is not initialized.");
+        }
+
+        int keyHash = hash(id);
+        Map.Entry<Integer, String> entry = ring.ceilingEntry(keyHash);
+
+        if (entry == null) {
+            entry = ring.firstEntry();
+        }
+
+        return entry.getValue();
     }
 }
