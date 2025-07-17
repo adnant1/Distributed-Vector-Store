@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -24,7 +25,7 @@ public class CoordinatorController {
 
     // Send index request to coordinator service, which routes it to the appropriate vector node
     @PostMapping("/index")
-    public ResponseEntity<?> index(IndexRequest request) {
+    public ResponseEntity<?> index(@RequestBody IndexRequest request) {
         if (request.getId() == null || request.getId().isBlank()) {
             return ResponseEntity.badRequest().body("ID cannot be null or blank");
         }
@@ -39,7 +40,7 @@ public class CoordinatorController {
 
     // Send query request to coordinator service, which queries all vector nodes and aggregates results
     @PostMapping("/query")
-    public ResponseEntity<?> query(QueryRequest request) {
+    public ResponseEntity<?> query(@RequestBody QueryRequest request) {
         if (request.getQueryText() == null || request.getQueryText().isBlank()) {
             return ResponseEntity.badRequest().body("Query text cannot be null or blank");
         }
