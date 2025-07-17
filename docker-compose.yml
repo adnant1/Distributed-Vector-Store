@@ -31,6 +31,8 @@ services:
   es-a:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
     container_name: es-a
+    ports:
+      - "9201:9200"
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
@@ -54,6 +56,8 @@ services:
   es-b:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
     container_name: es-b
+    ports:
+      - "9202:9200"
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
@@ -77,6 +81,8 @@ services:
   es-c:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
     container_name: es-c
+    ports:
+      - "9203:9200"
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
@@ -100,6 +106,8 @@ services:
   es-d:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
     container_name: es-d
+    ports:
+      - "9204:9200"
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
@@ -123,6 +131,8 @@ services:
   es-e:
     image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
     container_name: es-e
+    ports:
+      - "9205:9200"
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
