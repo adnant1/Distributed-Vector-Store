@@ -1,6 +1,8 @@
 package com.adnant1.coordinator.controller;
 
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,14 +27,14 @@ public class CoordinatorController {
 
     // Send index request to coordinator service, which routes it to the appropriate vector node
     @PostMapping("/index")
-    public ResponseEntity<?> index(@RequestBody IndexRequest request) {
-        if (request.getId() == null || request.getId().isBlank()) {
-            return ResponseEntity.badRequest().body("ID cannot be null or blank");
-        }
-
-        if (request.getText() == null || request.getText().isBlank()) {
+    public ResponseEntity<?> index(@RequestBody Map<String, String> body) {
+        String text = body.get("text");
+        if (text == null || text.isBlank()) {
             return ResponseEntity.badRequest().body("Text cannot be null or blank");
         }
+
+        String id = UUID.randomUUID().toString().replace("-", "").substring(0, 8);
+        IndexRequest request = new IndexRequest(id, text);
 
         coordinatorService.index(request);
         return ResponseEntity.ok().build();
