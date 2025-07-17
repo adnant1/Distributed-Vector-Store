@@ -40,6 +40,14 @@ public class CoordinatorController {
     // Send query request to coordinator service, which queries all vector nodes and aggregates results
     @PostMapping("/query")
     public ResponseEntity<?> query(QueryRequest request) {
-       
+        if (request.getQueryText() == null || request.getQueryText().isBlank()) {
+            return ResponseEntity.badRequest().body("Query text cannot be null or blank");
+        }
+        if (request.getTopK() <= 0) {
+            return ResponseEntity.badRequest().body("topK must be greater than 0");
+        }
+
+        List<QueryResult> results = coordinatorService.query(request);
+        return ResponseEntity.ok(results);
     }
 }
