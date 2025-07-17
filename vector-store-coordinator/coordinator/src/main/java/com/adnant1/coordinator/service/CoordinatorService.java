@@ -1,6 +1,10 @@
 package com.adnant1.coordinator.service;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -31,7 +35,28 @@ public class CoordinatorService {
         vectorNodeClient.sendIndexRequest(targetNode, request).block();
     }
 
+    // Concurrently query all vector nodes and aggregate results
     public List<QueryResult> query(QueryRequest request) {
+        List<CompletableFuture<List<QueryResult>>> futures = new ArrayList<>();
 
-    }   
+        for (String nodeUrl : nodeUrls) {
+            CompletableFuture<List<QueryResult>> future = vectorNodeClient
+                    .sendQueryRequest(nodeUrl, request)
+                    .toFuture()
+                    .exceptionally(ex -> {
+                        System.err.println("Query to node " + nodeUrl + " failed: " + ex.getMessage());
+                        return List.of();
+                    });
+            futures.add(future);
+        }
+
+        List<QueryResult> mergedResults = futures.stream()
+                .map(CompletableFuture::join)
+                .flatMap(List::stream)
+                .sorted(Comparator.comparingDouble(QueryResult::getScore).reversed())
+                .limit(request.getTopK())
+                .collect(Collectors.toList());
+        
+        return mergedResults;
+    }
 }
