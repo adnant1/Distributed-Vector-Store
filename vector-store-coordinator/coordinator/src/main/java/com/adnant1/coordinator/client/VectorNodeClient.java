@@ -23,7 +23,7 @@ public class VectorNodeClient {
     // Send index request to vector node
     public Mono<Void> sendIndexRequest(String nodeUrl, IndexRequest request) {
         return webClient.post()
-                .uri(nodeUrl + "/index")
+                .uri(nodeUrl + "/node/index")
                 .bodyValue(request)
                 .retrieve()
                 .bodyToMono(Void.class)
@@ -33,7 +33,7 @@ public class VectorNodeClient {
     // Send query request to vector node
     public Mono<List<QueryResult>> sendQueryRequest(String nodeUrl, QueryRequest request) {
         return webClient.post()
-                .uri(nodeUrl + "/query")
+                .uri(nodeUrl + "/node/query")
                 .bodyValue(request)
                 .retrieve()
                 .bodyToFlux(QueryResult.class)
