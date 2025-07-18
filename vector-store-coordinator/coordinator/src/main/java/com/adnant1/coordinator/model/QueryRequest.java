@@ -1,22 +1,22 @@
 package com.adnant1.coordinator.model;
 
 public class QueryRequest {
-    private String queryText;
+    private String query;
     private int topK;
 
     public QueryRequest() {}
 
-    public QueryRequest(String queryText, int topK) {
-        this.queryText = queryText;
+    public QueryRequest(String query, int topK) {
+        this.query = query;
         this.topK = topK;
     }
 
-    public String getQueryText() {
-        return queryText;
+    public String getQuery() {
+        return query;
     }
 
-    public void setQueryText(String queryText) {
-        this.queryText = queryText;
+    public void setQuery(String query) {
+        this.query = query;
     }
 
     public int getTopK() {
