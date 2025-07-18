@@ -3,8 +3,13 @@ package com.adnant1.coordinator.util;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableMap;
+import java.util.Set;
 import java.util.TreeMap;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -15,7 +20,8 @@ public class ConsistentHashRing{
     
     private final TreeMap<Integer, String> ring = new TreeMap<>();
     private final int VIRTUAL_NODES = 50; // Number of virtual nodes per real node
-
+    public static final int REPLICATION_FACTOR = 2; // Number of nodes to replicate data to
+    
     @Value("${coordinator.node-urls}")
     private List<String> nodeUrls;
 
@@ -51,8 +57,8 @@ public class ConsistentHashRing{
         }
     }
 
-    // Given a document ID, find the appropriate node URL
-    public String getNodeForId(String id) {
+    // Given a document ID, return REPLICATION_FACTOR distinct node URLs responsible for it
+    public List<String> getNodeForId(String id) {
         if (id == null || id.isBlank()) {
             throw new IllegalArgumentException("ID cannot be null or blank");
         }
@@ -62,12 +68,24 @@ public class ConsistentHashRing{
         }
 
         int keyHash = hash(id);
-        Map.Entry<Integer, String> entry = ring.ceilingEntry(keyHash);
+        List<String> nodes = new ArrayList<>();
+        Set<String> seen = new HashSet<>();
 
-        if (entry == null) {
-            entry = ring.firstEntry();
+        NavigableMap<Integer, String> tailMap = ring.tailMap(keyHash, true);
+        Iterator<Map.Entry<Integer, String>> it = tailMap.entrySet().iterator();
+
+        // Loop until we find REPLICATION_FACTOR distinct nodes
+        while (nodes.size() < REPLICATION_FACTOR) {
+            if (!it.hasNext()) {
+                it = ring.entrySet().iterator(); // Wrap around to the start of the ring
+            }
+
+            String physicalNode = it.next().getValue();
+            if (seen.add(physicalNode)) { // Only add if not already seen
+                nodes.add(physicalNode);
+            }
         }
 
-        return entry.getValue();
+        return nodes;
     }
 }
