@@ -37,7 +37,7 @@ public class VectorStoreService {
         boolean connected = false;
         
         // Retry logic to handle ES not being ready immediately
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < 10; i++) {
             try {
                 boolean exists = esClient.indices().exists(b -> b.index(indexName)).value();
 
