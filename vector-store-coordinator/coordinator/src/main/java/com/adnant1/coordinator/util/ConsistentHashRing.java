@@ -58,7 +58,7 @@ public class ConsistentHashRing{
     }
 
     // Given a document ID, return REPLICATION_FACTOR distinct node URLs responsible for it
-    public List<String> getNodeForId(String id) {
+    public List<String> getNodesForId(String id) {
         if (id == null || id.isBlank()) {
             throw new IllegalArgumentException("ID cannot be null or blank");
         }

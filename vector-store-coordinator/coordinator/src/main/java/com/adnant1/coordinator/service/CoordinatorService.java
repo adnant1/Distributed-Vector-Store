@@ -31,7 +31,7 @@ public class CoordinatorService {
 
     // Send the index request to the appropriate vector nodes via VectorNodeClient
     public void index(IndexRequest request) {
-        List<String> targetNodes = hashRing.getNodeForId(request.getId());
+        List<String> targetNodes = hashRing.getNodesForId(request.getId());
 
         for (String node : targetNodes) {
             vectorNodeClient.sendIndexRequest(node, request).block();

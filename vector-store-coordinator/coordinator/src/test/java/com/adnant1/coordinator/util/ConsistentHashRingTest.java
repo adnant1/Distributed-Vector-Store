@@ -51,7 +51,7 @@ class ConsistentHashRingTest {
         init.invoke(ring);
 
         for (int i = 0; i < 10; i++) {
-            assertEquals("http://only-node", ring.getNodeForId("user-" + i));
+            assertEquals("http://only-node", ring.getNodesForId("user-" + i));
         }
     }
 
@@ -65,8 +65,8 @@ class ConsistentHashRingTest {
 
     @Test
     void nullEmptyValidation() {
-        assertThrows(IllegalArgumentException.class, () -> ring.getNodeForId(null));
-        assertThrows(IllegalArgumentException.class, () -> ring.getNodeForId(""));
+        assertThrows(IllegalArgumentException.class, () -> ring.getNodesForId(null));
+        assertThrows(IllegalArgumentException.class, () -> ring.getNodesForId(""));
     }
 
     @Test
@@ -104,6 +104,6 @@ class ConsistentHashRingTest {
         }
         assertNotNull(candidate, "Should find an ID that wraps around");
         String expected = ringMap.firstEntry().getValue();
-        assertEquals(expected, wrap.getNodeForId(candidate), "IDs past max key should wrap to first node");
+        assertEquals(expected, wrap.getNodesForId(candidate), "IDs past max key should wrap to first node");
     }
 }
